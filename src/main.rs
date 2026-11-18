@@ -27,7 +27,8 @@ fn panic(panic_info: &core::panic::PanicInfo) -> ! {
     loop {}
 }
 
-const FPS: usize = 30;
+const FPS: f64 = 29.37;
+const FRAME_DELAY_PERIOD_US: u64 = (1_000_000_f64 / FPS) as u64;
 const BYTES_PER_FRAME: usize = 8;
 const FRAME_COUNT: usize = FRAMES.len() / BYTES_PER_FRAME;
 const LED_COUNT: usize = BYTES_PER_FRAME * BYTES_PER_FRAME;
@@ -64,7 +65,7 @@ async fn main(spawner: Spawner) -> ! {
     esp_rtos::start(timg0.timer0, peripherals.FROM_CPU_INTR0);
     let _ = spawner;
 
-    info!("[MAIN] app started! ");
+    info!("[MAIN] app started!");
 
     let freq = Rate::from_mhz(80);
     let rmt = Rmt::new(peripherals.RMT, freq).expect("Failed to initialize RMT");
@@ -78,7 +79,7 @@ async fn main(spawner: Spawner) -> ! {
         )
         .expect("Failed to initialize led");
 
-    let mut ticker = Ticker::every(Duration::from_millis((1000_f64 / (FPS as f64)) as u64));
+    let mut ticker = Ticker::every(Duration::from_micros(FRAME_DELAY_PERIOD_US));
 
     let buffer: &'static mut [RGB8; LED_COUNT] =
         BUFFER.init([RGB8 { r: 255, g: 0, b: 0 }; LED_COUNT]);
